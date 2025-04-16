@@ -17,16 +17,14 @@ public class AuthController {
     @Autowired
     private UserDetailServiceImp userDetailServiceImp;
 
-    @GetMapping("/prueba")
-    public String prueba(){
-        return "hola";
-    }
 
+    //sign up
     @PostMapping("/sign-up")
     public ResponseEntity<AuthResponse> register(@RequestBody @Valid AuthCreateUserRequest userRequest){
         return new ResponseEntity<>(this.userDetailServiceImp.createUser(userRequest), HttpStatus.CREATED);
     }
 
+    //login
     @CrossOrigin(origins = "http://localhost:4200/")
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthLoginRequest userRequest){

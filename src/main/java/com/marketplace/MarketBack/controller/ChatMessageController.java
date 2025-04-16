@@ -17,6 +17,7 @@ public class ChatMessageController {
     @Autowired
     private ChatMessageService chatMessageService;
 
+    //Function for send message
     @PostMapping("/send")
     public ResponseEntity<?> sendMessage(
             @PathVariable Long tradeId,
@@ -28,7 +29,7 @@ public class ChatMessageController {
     }
 
 
-
+    // function that allows to get the messages
     @GetMapping
     public ResponseEntity<List<?>> getMessages(@PathVariable Long tradeId) {
         return ResponseEntity.ok(chatMessageService.getChatMessages(tradeId));

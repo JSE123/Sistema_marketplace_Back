@@ -20,4 +20,8 @@ public class TagEntity {
     @Column(nullable = false)
     private String name;
 
+    @ManyToOne
+    @JoinColumn(name = "producto_id")
+    ProductEntity product;
+
 }
