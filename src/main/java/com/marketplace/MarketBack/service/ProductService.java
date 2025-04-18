@@ -98,6 +98,13 @@ public class ProductService {
         return emptyNames.toArray(new String[0]);
     }
 
+    public List<ProductEntity> getProductsByUserId(Authentication authentication) {
+        UserEntity user = userRepository.findUserEntityByUsername(authentication.getName())
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado", ErrorCode.USER_NOT_FOUND));
+
+        return productRepository.findByUserId(user.getId());
+    }
+
 
 //    public List<ProductEntity> searchProducts(ProductFilterDTO productFilterDTO) {
 //        return productRepository.searchProducts(productFilterDTO.title(),productFilterDTO.status(), productFilterDTO.categoryId(), productFilterDTO.location());

@@ -29,7 +29,7 @@ public class TradeController {
         return ResponseEntity.ok(tradeService.requestTrade(receiverId, requestedProductId, offeredProductId, authentication));
     }
 
-
+    //It allows to get the trades from a user
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<TradeRequestEntity>> getUserTrades(@PathVariable Long userId) {
         return ResponseEntity.ok(tradeService.getUserTrades(userId));

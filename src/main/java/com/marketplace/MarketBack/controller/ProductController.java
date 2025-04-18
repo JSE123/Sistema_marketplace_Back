@@ -44,6 +44,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
+    //Get product by owner
+    @GetMapping("get-my-products")
+    public ResponseEntity<List<ProductEntity>> getProductsByUserId(Authentication authentication){
+        return ResponseEntity.ok(productService.getProductsByUserId(authentication));
+    }
+
 //    @GetMapping("/search")
 //    public ResponseEntity<List<ProductEntity>> searchProducts( @RequestParam(required = false) String title,
 //                                                               @RequestParam(required = false) EstadoProducto status,
@@ -59,7 +65,7 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable Long id){
         productService.deleteProduct(id);
-        return ResponseEntity.ok("eliminado correctamente");
+        return ResponseEntity.ok("Eliminado correctamente");
     }
 
     //Update product
@@ -68,11 +74,6 @@ public class ProductController {
         String username = authentication.getName();
         productService.updateProduct(id, productUpdateDTO, username);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("prueba")
-    public Authentication getUserAuthenticated(Authentication authentication){
-        return authentication;
     }
 
 }

@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     Optional<ProductEntity> findByIdAndUser(Long id, UserEntity user);
 
+    List<ProductEntity> findByUserId(Long id);
+
 //    @Query("SELECT p FROM ProductEntity p WHERE " +
 //            "(:title IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND " +
 //            "(:status IS NULL OR p.status = :status) AND " +
