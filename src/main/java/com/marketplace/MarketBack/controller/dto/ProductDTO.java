@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 public record ProductDTO(
     @NotBlank String title,
     @NotBlank String description,
+    @NotBlank long price,
     @Valid EstadoProducto status,
     Long categoryId,
     String location

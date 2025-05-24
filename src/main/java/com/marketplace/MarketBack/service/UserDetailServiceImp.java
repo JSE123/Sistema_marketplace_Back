@@ -3,6 +3,9 @@ package com.marketplace.MarketBack.service;
 import com.marketplace.MarketBack.controller.dto.AuthCreateUserRequest;
 import com.marketplace.MarketBack.controller.dto.AuthLoginRequest;
 import com.marketplace.MarketBack.controller.dto.AuthResponse;
+import com.marketplace.MarketBack.exception.custom.NotFoundException;
+import com.marketplace.MarketBack.exception.custom.UsernameAlreadyExistsException;
+import com.marketplace.MarketBack.exception.enums.ErrorCode;
 import com.marketplace.MarketBack.persistence.entity.RoleEntity;
 import com.marketplace.MarketBack.persistence.entity.UserEntity;
 import com.marketplace.MarketBack.persistence.repository.RoleRepository;
@@ -68,15 +71,19 @@ public class UserDetailServiceImp implements UserDetailsService {
                 authorityList);
     }
 
-    public AuthResponse createUser(AuthCreateUserRequest createRoleRequest){
-        String username = createRoleRequest.username();
-        String password = createRoleRequest.password();
-        List<String> rolesRequest = createRoleRequest.roleRequest().roleListName();
+    public AuthResponse createUser(AuthCreateUserRequest createUserRequest){
+        String username = createUserRequest.username();
+        String password = createUserRequest.password();
+        List<String> rolesRequest = createUserRequest.roleRequest().roleListName();
 
         Set<RoleEntity> roleEntityList = new HashSet<>(roleRepository.findRoleEntitiesByRoleEnumIn(rolesRequest));
 
         if (roleEntityList.isEmpty()) {
             throw new IllegalArgumentException("The roles specified does not exist.");
+        }
+
+        if(userRepository.existsByUsername(username)){
+            throw new UsernameAlreadyExistsException("The username '" + username + "' is already registered.");
         }
 
         UserEntity userEntity = UserEntity.builder().username(username).password(passwordEncoder.encode(password)).roles(roleEntityList).isEnable(true).accountNoLocked(true).accountNoExpired(true).credentialNoExpired(true).build();
@@ -92,7 +99,7 @@ public class UserDetailServiceImp implements UserDetailsService {
         SecurityContext securityContextHolder = SecurityContextHolder.getContext();
         Authentication authentication = new UsernamePasswordAuthenticationToken(userSaved, null, authorities);
 
-        String accessToken = jwtUtils.createToken(authentication);
+        String accessToken = jwtUtils.createToken(authentication, userSaved.getId());
 
         return new AuthResponse(username, "User created successfully", accessToken, true);
     }
@@ -101,10 +108,13 @@ public class UserDetailServiceImp implements UserDetailsService {
         String username = authLoginRequest.username();
         String password = authLoginRequest.password();
 
+//        obtener id del usuario
+        UserEntity user = userRepository.findUserEntityByUsername(username).orElseThrow(() -> new NotFoundException("Usuario no encontrado", ErrorCode.USER_NOT_FOUND));
+
         Authentication authentication = this.authenticate(username, password);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String accessToken = jwtUtils.createToken(authentication);
+        String accessToken = jwtUtils.createToken(authentication, user.getId());
         return new AuthResponse(username, "User loged succesfully", accessToken, true);
     }
 

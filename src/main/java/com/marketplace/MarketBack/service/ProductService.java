@@ -1,13 +1,16 @@
 package com.marketplace.MarketBack.service;
 
 import com.marketplace.MarketBack.controller.dto.ProductDTO;
+import com.marketplace.MarketBack.controller.dto.ProductResponseDTO;
 import com.marketplace.MarketBack.controller.dto.ProductUpdateDTO;
 import com.marketplace.MarketBack.exception.custom.NotFoundException;
 import com.marketplace.MarketBack.exception.enums.ErrorCode;
 import com.marketplace.MarketBack.persistence.entity.CategoryEntity;
 import com.marketplace.MarketBack.persistence.entity.ProductEntity;
+import com.marketplace.MarketBack.persistence.entity.ProductImageEntity;
 import com.marketplace.MarketBack.persistence.entity.UserEntity;
 import com.marketplace.MarketBack.persistence.repository.CateoryRepository;
+import com.marketplace.MarketBack.persistence.repository.ProductImageRepository;
 import com.marketplace.MarketBack.persistence.repository.ProductRepository;
 import com.marketplace.MarketBack.persistence.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -22,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -32,8 +36,15 @@ public class ProductService {
 
     @Autowired
     CateoryRepository categoryRepository;
+
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    private ProductImageRepository imageRepository;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     public ProductEntity createProduct(ProductDTO productDTO, Authentication authentication) {
 
@@ -46,6 +57,7 @@ public class ProductService {
                 .title(productDTO.title())
                 .description(productDTO.description())
                 .user(user)
+                .price(productDTO.price())
                 .category(category)
                 .status(productDTO.status())
                 .location(productDTO.location())
@@ -56,22 +68,84 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public ProductEntity getProduct(Long id) {
+    public ProductResponseDTO getProduct(Long id) {
 //        return productRepository.findById(id)
 //                .orElseThrow(() -> new RuntimeException("No existe el producto"));
-        return productRepository.findById(id)
+        ProductEntity product =  productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id,
                         ErrorCode.USER_NOT_FOUND));
+
+        return ProductResponseDTO.builder()
+                .id(product.getId())
+                .title(product.getTitle())
+                .imageUrls(product.getImages()
+                        .stream()
+                        .map(ProductImageEntity::getUrl)
+                        .collect(Collectors.toList()))
+                .description(product.getDescription())
+                .status(product.getStatus())
+                .price(product.getPrice())
+                .user(product.getUser())
+                .build();
+//        return new ProductResponseDTO(
+//                product.getId(),
+//                product.getTitle(),
+//                product.getDescription(),
+//                product.getImages()
+//                        .stream()
+//                        .map(ProductImageEntity::getUrl)
+//                        .collect(Collectors.toList()));
     }
 
-    public List<ProductEntity> getAllProducts() {
-        return productRepository.findAll();
+//    public List<ProductEntity> getAllProducts() {
+//        List<ProductEntity> products = productRepository.findAll();
+//
+//
+//        ProductImageEntity image;
+//
+//
+//        imageRepository.findByProductId()
+//        return productRepository.findAll();
+//
+//    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<ProductResponseDTO> getAllProducts() {
+//        return productRepository.findAll().stream()
+//                .map(product -> new ProductResponseDTO(
+//                                product.getId(),
+//                                product.getTitle(),
+//                                product.getDescription(),
+//                                product.getImages().stream()
+//                                        .map(ProductImageEntity::getUrl)
+//                                        .collect(Collectors.toList())
+//                ))
+//                .collect(Collectors.toList());
+        return productRepository.findAll().stream()
+                .map(product -> {
+                    return ProductResponseDTO.builder()
+                            .id(product.getId())
+                            .title(product.getTitle())
+                            .price(product.getPrice())
+                            .imageUrls(product.getImages().stream()
+                                    .map(ProductImageEntity::getUrl)
+                                    .collect(Collectors.toList()))
+                            .build();
+                }).collect(Collectors.toList());
     }
 
-    public void deleteProduct(Long id) {
-        ProductEntity producto = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+    public void deleteProduct(Long id, Authentication auth) {
+        ProductEntity product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        productRepository.delete(producto);
+        //verify if the product belongs to the user in session
+        UserEntity user = userRepository.findUserEntityByUsername(auth.getName()).orElseThrow(() -> new NotFoundException("User not found", ErrorCode.USER_NOT_FOUND));
+        if(!product.getUser().equals(user)){
+            return;
+        }
+
+        cloudinaryService.deleteImageFromCloudinary(product.getImages());
+
+        productRepository.delete(product);
     }
 
     @Transactional
@@ -98,15 +172,27 @@ public class ProductService {
         return emptyNames.toArray(new String[0]);
     }
 
-    public List<ProductEntity> getProductsByUserId(Authentication authentication) {
+    public List<ProductResponseDTO> getProductsByUserId(Authentication authentication) {
         UserEntity user = userRepository.findUserEntityByUsername(authentication.getName())
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado", ErrorCode.USER_NOT_FOUND));
 
-        return productRepository.findByUserId(user.getId());
+        return productRepository.findByUserId(user.getId()).stream().map(productEntity -> {
+            return ProductResponseDTO.builder()
+                    .description(productEntity.getDescription())
+                    .id(productEntity.getId())
+                    .title(productEntity.getTitle())
+                    .status(productEntity.getStatus())
+                    .price(productEntity.getPrice())
+                    .updatedAt(productEntity.getUpdatedAt())
+                    .imageUrls(productEntity.getImages().stream().map(ProductImageEntity::getUrl)
+                            .collect(Collectors.toList()))
+                    .build();
+        }).collect(Collectors.toList());
     }
 
 
 //    public List<ProductEntity> searchProducts(ProductFilterDTO productFilterDTO) {
 //        return productRepository.searchProducts(productFilterDTO.title(),productFilterDTO.status(), productFilterDTO.categoryId(), productFilterDTO.location());
 //    }
+
 }

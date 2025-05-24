@@ -1,6 +1,7 @@
 package com.marketplace.MarketBack.exception.handler;
 
 import com.marketplace.MarketBack.exception.custom.NotFoundException;
+import com.marketplace.MarketBack.exception.custom.UsernameAlreadyExistsException;
 import com.marketplace.MarketBack.exception.dto.ErrorResponse;
 import com.marketplace.MarketBack.exception.enums.ErrorCode;
 import org.springframework.http.HttpStatus;
@@ -45,5 +46,10 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<String> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
 }

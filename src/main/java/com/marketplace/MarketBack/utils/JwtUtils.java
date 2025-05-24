@@ -27,8 +27,9 @@ public class JwtUtils {
     @Value("${security.jwt.user.generator}")
     private String userGenerator;
 
-    public String createToken(Authentication authentication){
+    public String createToken(Authentication authentication, Long id){
         Algorithm algorithm = Algorithm.HMAC256(this.privateKey);
+
 
         String username = authentication.getPrincipal().toString();
         String authorities = authentication.getAuthorities()
@@ -38,9 +39,10 @@ public class JwtUtils {
         return JWT.create()
                 .withIssuer(this.userGenerator)
                 .withSubject(username)
+                .withClaim("id", id)
                 .withClaim("authorities", authorities)
                 .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 3000000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + 1800000))
                 .withJWTId(UUID.randomUUID().toString())
                 .withNotBefore(new Date(System.currentTimeMillis()))
                 .sign(algorithm);

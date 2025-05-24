@@ -2,6 +2,7 @@ package com.marketplace.MarketBack.controller;
 
 import com.marketplace.MarketBack.controller.dto.ProductDTO;
 import com.marketplace.MarketBack.controller.dto.ProductFilterDTO;
+import com.marketplace.MarketBack.controller.dto.ProductResponseDTO;
 import com.marketplace.MarketBack.controller.dto.ProductUpdateDTO;
 import com.marketplace.MarketBack.persistence.entity.EstadoProducto;
 import com.marketplace.MarketBack.persistence.entity.ProductEntity;
@@ -34,19 +35,19 @@ public class ProductController {
 
     //Get product by product id
     @GetMapping("/{id}")
-    public ProductEntity getProduct(@PathVariable Long id){
-        return productService.getProduct(id);
+    public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable Long id){
+        return ResponseEntity.ok(productService.getProduct(id));
     }
 
     //Get all products
     @GetMapping
-    public ResponseEntity<List<ProductEntity>> getAllProducts() {
+    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
     //Get product by owner
     @GetMapping("get-my-products")
-    public ResponseEntity<List<ProductEntity>> getProductsByUserId(Authentication authentication){
+    public ResponseEntity<List<ProductResponseDTO>> getProductsByUserId(Authentication authentication){
         return ResponseEntity.ok(productService.getProductsByUserId(authentication));
     }
 
@@ -63,8 +64,8 @@ public class ProductController {
 
     //Delete product
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable Long id){
-        productService.deleteProduct(id);
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id, Authentication authentication){
+        productService.deleteProduct(id, authentication);
         return ResponseEntity.ok("Eliminado correctamente");
     }
 
