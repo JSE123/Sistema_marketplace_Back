@@ -45,17 +45,25 @@ public class SecurityConfig {
                     http.requestMatchers(HttpMethod.POST, "/auth/**").permitAll();
                     http.requestMatchers(HttpMethod.GET, "/auth/**").permitAll();
                     http.requestMatchers("/uploads/**").permitAll();
-                    http.requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("USER", "ADMIN");
+
+                    //users
                     http.requestMatchers(HttpMethod.POST, "/api/users/**").hasAnyRole("USER", "ADMIN");
+                    http.requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("USER", "ADMIN");
+                    http.requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN");
+                    http.requestMatchers(HttpMethod.PATCH, "/api/users/**").hasRole("ADMIN");
+                    //products
                     http.requestMatchers(HttpMethod.GET, "/api/products/**").permitAll();
                     http.requestMatchers(HttpMethod.GET, "/api/products/get-my-products").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.PATCH, "/api/products/**").hasAnyRole("ADMIN", "USER");
-                    http.requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("ADMIN", "USER");
+                    //categories
+                    http.requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ADMIN");
-                    http.requestMatchers(HttpMethod.GET, "/api/categories/**").hasAnyRole("ADMIN", "USER");
+                    http.requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN");
+                    http.requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN");
+
                     http.requestMatchers(HttpMethod.GET, "/api/tags/**").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.POST, "/api/tags/**").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.GET, "/api/trade/**").hasAnyRole("ADMIN", "USER");
@@ -93,7 +101,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:4200"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // importante si usas JWT con cookies o headers
 

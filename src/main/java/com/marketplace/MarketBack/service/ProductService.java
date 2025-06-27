@@ -22,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +47,7 @@ public class ProductService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    public ProductEntity createProduct(ProductDTO productDTO, Authentication authentication) {
+    public ProductDTO createProduct(ProductDTO productDTO, Authentication authentication) {
 
         UserEntity user = userRepository.findUserEntityByUsername(authentication.getName()).orElseThrow(() -> new RuntimeException("No se encontro el usuario"));
         CategoryEntity category = categoryRepository.findById(productDTO.categoryId()).orElseThrow(() -> new NotFoundException("Categoria no encontrada", ErrorCode.CATEGORY_NOT_FOUND));
@@ -58,6 +59,7 @@ public class ProductService {
                 .description(productDTO.description())
                 .user(user)
                 .price(productDTO.price())
+                .stock(productDTO.stock())
                 .category(category)
                 .status(productDTO.status())
                 .location(productDTO.location())
@@ -65,7 +67,9 @@ public class ProductService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        return productRepository.save(product);
+//        return productRepository.save(product);
+        ProductEntity newProduct = productRepository.save(product);
+        return new ProductDTO(newProduct.getTitle(),newProduct.getDescription(), newProduct.getPrice(), newProduct.getStock(), newProduct.getStatus(), newProduct.getCategory().getId(), newProduct.getLocation(), newProduct.getId() );
     }
 
     public ProductResponseDTO getProduct(Long id) {
@@ -85,7 +89,9 @@ public class ProductService {
                 .description(product.getDescription())
                 .status(product.getStatus())
                 .price(product.getPrice())
-                .user(product.getUser())
+                .stock(product.getStock())
+                .user(product.getUser().getId().toString())
+                .category(product.getCategory())
                 .build();
 //        return new ProductResponseDTO(
 //                product.getId(),
@@ -97,17 +103,6 @@ public class ProductService {
 //                        .collect(Collectors.toList()));
     }
 
-//    public List<ProductEntity> getAllProducts() {
-//        List<ProductEntity> products = productRepository.findAll();
-//
-//
-//        ProductImageEntity image;
-//
-//
-//        imageRepository.findByProductId()
-//        return productRepository.findAll();
-//
-//    }
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<ProductResponseDTO> getAllProducts() {
@@ -183,11 +178,36 @@ public class ProductService {
                     .title(productEntity.getTitle())
                     .status(productEntity.getStatus())
                     .price(productEntity.getPrice())
+                    .stock(productEntity.getStock())
                     .updatedAt(productEntity.getUpdatedAt())
                     .imageUrls(productEntity.getImages().stream().map(ProductImageEntity::getUrl)
                             .collect(Collectors.toList()))
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    public List<ProductResponseDTO> getProductByCategoryId(long categoryId) {
+        //Verify if the category exists
+        CategoryEntity category = categoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("Categoria no encontrada", ErrorCode.CATEGORY_NOT_FOUND));
+        List<ProductEntity> products = productRepository.findByCategory(category);
+
+        List<ProductResponseDTO> productList = new ArrayList<>();
+
+        products.stream().map( product ->
+                productList.add(ProductResponseDTO.builder()
+                                .id(product.getId())
+                                .title(product.getTitle())
+                                .description(product.getDescription())
+                                .price(product.getPrice())
+                                .imageUrls(product.getImages().stream().map(ProductImageEntity::getUrl).collect(Collectors.toList()))
+                                .status(product.getStatus())
+                                .updatedAt(product.getUpdatedAt())
+                        .build())
+
+        ).collect(Collectors.toList());
+
+        return productList;
+
     }
 
 

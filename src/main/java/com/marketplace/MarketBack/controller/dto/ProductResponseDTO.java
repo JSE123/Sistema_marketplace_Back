@@ -1,5 +1,6 @@
 package com.marketplace.MarketBack.controller.dto;
 
+import com.marketplace.MarketBack.persistence.entity.CategoryEntity;
 import com.marketplace.MarketBack.persistence.entity.EstadoProducto;
 import com.marketplace.MarketBack.persistence.entity.ProductEntity;
 import com.marketplace.MarketBack.persistence.entity.UserEntity;
@@ -22,19 +23,10 @@ public class ProductResponseDTO {
     private String title;
     private String description;
     private long price;
+    private int stock;
     private List<String> imageUrls;
     private EstadoProducto status = EstadoProducto.NUEVO;
-    private UserEntity user = null;
+    private String user = null;
     private LocalDateTime updatedAt ;
-
-
-//    public ProductDTO(ProductEntity product) {
-//        this.id = product.getId();
-//        this.name = product.getName();
-//        this.description = product.getDescription();
-//        this.price = product.getPrice();
-//        this.imageUrls = product.getImages().stream()
-//                .map(ProductImage::getImageUrl)
-//                .collect(Collectors.toList());
-//    }
+    private CategoryEntity category;
 }

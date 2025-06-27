@@ -36,7 +36,7 @@ public class ProductImageController {
             if(!imageUrl.isEmpty()){
                 imageService.saveImage(idProduct, imageUrl);
             }
-            return ResponseEntity.ok().body(Map.of("imageUrl", imageUrl));
+            return ResponseEntity.ok(imageUrl);
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Error al subir la imagen: " + e.getMessage());
         }

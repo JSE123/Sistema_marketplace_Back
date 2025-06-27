@@ -28,14 +28,14 @@ public class ProductController {
 
     //Create a new product
     @PostMapping
-    public ResponseEntity<ProductEntity> createProduct(@RequestBody ProductDTO productDTO, Authentication authentication){
-        ProductEntity newProduct = productService.createProduct(productDTO, authentication);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newProduct);
+    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO, Authentication authentication){
+
+        return ResponseEntity.ok(productService.createProduct(productDTO, authentication));
     }
 
     //Get product by product id
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable Long id){
+    public ResponseEntity<?> getProduct(@PathVariable Long id){
         return ResponseEntity.ok(productService.getProduct(id));
     }
 
@@ -66,15 +66,22 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable Long id, Authentication authentication){
         productService.deleteProduct(id, authentication);
-        return ResponseEntity.ok("Eliminado correctamente");
+        return ResponseEntity.noContent().build();
+//        return ResponseEntity.ok("Eliminado correctamente");
     }
 
     //Update product
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateProduct(@PathVariable Long id, @RequestBody ProductUpdateDTO productUpdateDTO, Authentication authentication){
+    public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody ProductUpdateDTO productUpdateDTO, Authentication authentication){
         String username = authentication.getName();
         productService.updateProduct(id, productUpdateDTO, username);
         return ResponseEntity.noContent().build();
+    }
+
+    //Get product by category
+    @GetMapping("category/{categoryId}")
+    public ResponseEntity<List<ProductResponseDTO>> getProductByCategory(@PathVariable long categoryId){
+        return ResponseEntity.ok(productService.getProductByCategoryId(categoryId));
     }
 
 }

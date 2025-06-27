@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "user_images")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "user_images")
 public class UserImageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

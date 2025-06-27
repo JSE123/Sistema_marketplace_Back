@@ -32,18 +32,19 @@ public class UserEntity implements UserDetails {
 
     @Column(unique = true)
     private String username;
+
+    private String name;
     private String lastName;
 
     private String password;
 
-    private String name;
 
     @Column(unique = true)
     private String email;
 
-    private String avatar;
     private String description;
     private String phone;
+    private String address;
 
     @OneToMany(mappedBy = "ratedUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ReputationEntity> reputations;
@@ -62,7 +63,7 @@ public class UserEntity implements UserDetails {
 
 
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles = new HashSet<>();
 

@@ -1,93 +1,98 @@
 package com.marketplace.MarketBack.controller;
 
-import com.marketplace.MarketBack.controller.dto.ReputationDTO;
-import com.marketplace.MarketBack.controller.dto.UserProfileDto;
-import com.marketplace.MarketBack.persistence.entity.ReputationEntity;
+import com.marketplace.MarketBack.controller.dto.*;
 import com.marketplace.MarketBack.persistence.entity.UserEntity;
+import com.marketplace.MarketBack.persistence.entity.UserImageEntity;
+import com.marketplace.MarketBack.service.CloudinaryService;
+import com.marketplace.MarketBack.service.UserImageService;
 import com.marketplace.MarketBack.service.UserService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("api/users")
+@RequestMapping("/api/users")
 public class UserController {
     @Autowired
     private UserService userService;
 
-    private final String UploadDir = "src/main/resources/static/avatars/";
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private UserImageService userImageService;
+
 
     //Get all users
     @GetMapping
-    public List<UserEntity> getUsers(){
-        return userService.getAllUsers();
+    public ResponseEntity<?> getUsers(){
+        return ResponseEntity.ok(userService.getAllUsers());
     }
-
 
     //Obtener perfil de usuario
     @GetMapping("/{id}")
-    public UserEntity getUser(@PathVariable Long id){
-        return userService.getUserById(id);
+    public ResponseEntity<?> getUser(@PathVariable Long id){
+
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     //Update user profile
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateProfile(@PathVariable Long id, @RequestBody UserProfileDto userProfileDto){
-        userService.updateUserProfile(id, userProfileDto);
-        return ResponseEntity.ok("Perfil actualizado correctamente");
-    }
-
-    @PostMapping("/{id}/avatar")
-    public ResponseEntity<String> updateAvatar(@PathVariable Long id, @RequestParam("file") MultipartFile file){
-        try{
-            String avatarFileName = userService.saveAvatar(file);
-            boolean update = userService.updateAvatar(avatarFileName, id);
-            if(update){
-                return ResponseEntity.ok("Avatar acutalizado correctamente");
-            }else{
-                return ResponseEntity.badRequest().body("Error al guardar el avatar");
-            }
-        }catch (IOException e){
-            return ResponseEntity.internalServerError().body("Error al guardar el avatar");
-        }
-
+    @PutMapping()
+    public ResponseEntity<?> updateProfile(Authentication authentication, @RequestBody UserProfileDto userProfileDto){
+        userService.updateUserProfile(authentication, userProfileDto);
+        return ResponseEntity.noContent().build();
     }
 
 
-    @GetMapping("/{id}/avatar")
-    public ResponseEntity<Resource> getAvatar(@PathVariable Long id){
+    @PostMapping("/{idUser}/avatar")
+    public ResponseEntity<?> saveAvatar(@PathVariable Long idUser,
+                                        @RequestParam("image") MultipartFile file, Authentication authentication) throws IOException{
         try{
-            UserEntity user = userService.getUserById(id);
-            if(user == null || user.getAvatar() == null){
-                return ResponseEntity.notFound().build();
-            }
+          Map<String, String> image = cloudinaryService.uploadFile(file, "UserImages");
 
-            Path filePath = Paths.get(UploadDir + user.getAvatar());
-            Resource resource = new UrlResource(filePath.toUri());
+          if(!image.isEmpty()){
+              //guardar registro en tabla
+              UserImageDTOResponse userImage = userImageService.saveImage(authentication, image, "avatar");
+              return ResponseEntity.status(HttpStatus.OK).body(userImage);
 
-            if (resource.exists() || resource.isReadable()) {
-                return ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + user.getAvatar() + "\"")
-                        .body(resource);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
+          }else{
+              return ResponseEntity.ok("Ocurrio un error al guardar el avatar");
 
-        }catch (MalformedURLException e){
-            return ResponseEntity.internalServerError().build();
+          }
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Error al subir el avatar: " + e.getMessage());
         }
     }
+
+    @PostMapping("/{idUser}/portada")
+    public ResponseEntity<?> savePortada(@PathVariable Long idUser,
+                                        @RequestParam("image") MultipartFile file, Authentication authentication) throws IOException{
+        try{
+          Map<String, String> image = cloudinaryService.uploadFile(file, "UserImages");
+
+          if(!image.isEmpty()){
+              //guardar registro en tabla
+              UserImageDTOResponse userImage = userImageService.saveImage(authentication, image, "portada");
+//              return ResponseEntity.ok("Avatar guardado correctamente"+userImage);
+              return ResponseEntity.status(HttpStatus.CREATED).body(userImage);
+          }else{
+              return ResponseEntity.ok("Ocurrio un error al guardar la portada");
+
+          }
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Error al subir la portada: " + e.getMessage());
+        }
+    }
+
 
     //Rate user
     @PostMapping("/{idRatedUser}/reputation")
@@ -100,5 +105,18 @@ public class UserController {
     @GetMapping("/{idRatedUser}/reputation")
     public ResponseEntity<Double> getReputationById(@PathVariable Long idRatedUser){
         return ResponseEntity.ok(userService.getReputation(idRatedUser));
+    }
+
+    //delete user
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable long id){
+        userService.deleteUser(id);
+        return ResponseEntity.ok("Eliminano correctamente");
+    }
+
+    //Update role
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updateRole(@PathVariable long id,@RequestBody UpdateRolesRequestDTO updateRolesRequestDTO){
+        return ResponseEntity.ok(userService.updateRoles(id, updateRolesRequestDTO));
     }
 }

@@ -32,10 +32,16 @@ public class CloudinaryService {
         );
     }
 
-    public String uploadFile(MultipartFile file, String folder) throws IOException {
+    public Map<String, String> uploadFile(MultipartFile file, String folder) throws IOException {
         Map options = ObjectUtils.asMap("folder", folder);
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(), options);
-        return uploadResult.get("url").toString();
+
+
+        return Map.of(
+                "url", uploadResult.get("url").toString(),
+                "public_id", uploadResult.get("public_id").toString()
+
+        );
     }
 
     public void deleteFile(String publicId) throws IOException {
