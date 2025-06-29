@@ -72,6 +72,9 @@ public class SecurityConfig {
                     http.requestMatchers(HttpMethod.POST, "/api/trades/{tradeId}/chat/**").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.GET, "/api/trades/{tradeId}/chat/**").hasAnyRole("ADMIN", "USER");
 
+                    //sales
+                    http.requestMatchers(HttpMethod.POST, "/api/sales/**").hasAnyRole("ADMIN", "USER");
+
                     http.anyRequest().denyAll();//niega el acceso a todos los endpoints que no estan especificados
 
                 })
