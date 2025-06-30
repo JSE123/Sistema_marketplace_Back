@@ -26,6 +26,9 @@ public class SaleService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private ProductService productService;
+
     //Save new sales
     public SaleDto createSale(SaleDto saleDto){
         //verify if the product exists and is available
@@ -45,6 +48,10 @@ public class SaleService {
         // Save the sale entity to the database
         SaleEntity saleSaved = saleRepository .save(sale);
         // Map the Saleentity to the SaleDto
+
+        // if sale saved is successful, decrease the product stock
+        productService.decreaseStock(product.getId(), saleDto.amount());
+
 
         return new SaleDto(
                 saleSaved.getProduct().getId(),

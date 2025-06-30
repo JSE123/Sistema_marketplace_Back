@@ -215,4 +215,27 @@ public class ProductService {
 //        return productRepository.searchProducts(productFilterDTO.title(),productFilterDTO.status(), productFilterDTO.categoryId(), productFilterDTO.location());
 //    }
 
+    // Method to decrease stock when a product is purchased
+    @Transactional
+    public ProductDTO decreaseStock(Long productId, int quantity) {
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Producto no encontrado", ErrorCode.PRODUCT_NOT_FOUND));
+        if (product.getStock() < quantity) {
+            throw new RuntimeException("Stock insuficiente para el producto con ID: " + productId);
+        }
+        product.setStock(product.getStock() - quantity);
+        product.setUpdatedAt(LocalDateTime.now());
+        productRepository.save(product);
+        return new ProductDTO(
+                product.getTitle(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStock(),
+                product.getStatus(),
+                product.getCategory().getId(),
+                product.getLocation(),
+                product.getId()
+        );
+    }
+
 }

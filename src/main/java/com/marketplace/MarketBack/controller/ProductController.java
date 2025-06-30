@@ -16,7 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.List;import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -83,5 +83,7 @@ public class ProductController {
     public ResponseEntity<List<ProductResponseDTO>> getProductByCategory(@PathVariable long categoryId){
         return ResponseEntity.ok(productService.getProductByCategoryId(categoryId));
     }
+
+
 
 }

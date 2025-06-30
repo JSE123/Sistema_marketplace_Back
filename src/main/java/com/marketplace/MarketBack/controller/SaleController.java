@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/sales")
+@RequestMapping("/api/sales/")
 public class SaleController {
     @Autowired
     private SaleService saleService;
@@ -19,7 +19,7 @@ public class SaleController {
     // methods for create a new sale
     @PostMapping
     public ResponseEntity<?> createSale(@RequestBody SaleDto saleEntity) {
-        ;
+
         return ResponseEntity.ok(saleService.createSale(saleEntity));
     }
 }
