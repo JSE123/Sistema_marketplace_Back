@@ -180,6 +180,7 @@ public class ProductService {
                     .price(productEntity.getPrice())
                     .stock(productEntity.getStock())
                     .updatedAt(productEntity.getUpdatedAt())
+                    .createdAt(productEntity.getCreatedAt())
                     .imageUrls(productEntity.getImages().stream().map(ProductImageEntity::getUrl)
                             .collect(Collectors.toList()))
                     .build();

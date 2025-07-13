@@ -76,7 +76,7 @@ public class ProductController {
         String username = authentication.getName();
         productService.updateProduct(id, productUpdateDTO, username);
         return ResponseEntity.noContent().build();
-    }
+    } 
 
     //Get product by category
     @GetMapping("category/{categoryId}")

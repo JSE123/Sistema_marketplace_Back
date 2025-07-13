@@ -69,11 +69,14 @@ public class SecurityConfig {
                     http.requestMatchers(HttpMethod.GET, "/api/trade/**").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.POST, "/api/trade/**").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.PUT, "/api/trade/**").hasAnyRole("ADMIN", "USER");
-                    http.requestMatchers(HttpMethod.POST, "/api/trades/{tradeId}/chat/**").hasAnyRole("ADMIN", "USER");
-                    http.requestMatchers(HttpMethod.GET, "/api/trades/{tradeId}/chat/**").hasAnyRole("ADMIN", "USER");
+
+                    //messages
+                    http.requestMatchers(HttpMethod.POST, "/api/messages/**").hasAnyRole("ADMIN", "USER");
+                    http.requestMatchers(HttpMethod.GET, "/api/messages/**").hasAnyRole("ADMIN", "USER");
 
                     //sales
                     http.requestMatchers(HttpMethod.POST, "/api/sales/**").hasAnyRole("ADMIN", "USER");
+                    http.requestMatchers(HttpMethod.GET, "/api/sales/**").hasAnyRole("ADMIN", "USER");
 
                     http.anyRequest().denyAll();//niega el acceso a todos los endpoints que no estan especificados
 

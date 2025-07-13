@@ -27,6 +27,7 @@ public class ProductResponseDTO {
     private List<String> imageUrls;
     private EstadoProducto status = EstadoProducto.NUEVO;
     private String user = null;
-    private LocalDateTime updatedAt ;
+    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
     private CategoryEntity category;
 }

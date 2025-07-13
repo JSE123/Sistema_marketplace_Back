@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SaleService {
 
@@ -62,4 +64,29 @@ public class SaleService {
     }
 
 
+    public List<SaleDto> getSaleByUserId(long userId) {
+        // Check if the user exists
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // Retrieve sales by user ID
+        List<SaleEntity> sales = saleRepository.findByUser(user);
+
+        // If no sales found, throw an exception
+        if (sales.isEmpty()) {
+            throw new NotFoundException("No sales found for this user", ErrorCode.SALE_NOT_FOUND);
+        }
+
+        // Map SaleEntity to SaleDto if needed, or return directly
+        List<SaleDto> saleDto = sales.stream()
+                .map(sale -> new SaleDto(
+                        sale.getProduct().getId(),
+                        sale.getAmount(),
+                        sale.getTotal(),
+                        sale.getUser().getId()))
+                .toList();
+
+        return saleDto;
+    }
 }
+
