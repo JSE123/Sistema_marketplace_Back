@@ -1,21 +1,18 @@
 package com.marketplace.MarketBack.controller;
 
 import com.marketplace.MarketBack.controller.dto.ConversationResponseDto;
-import com.marketplace.MarketBack.controller.dto.MarkMessageDto;
 import com.marketplace.MarketBack.controller.dto.MessageRequestDto;
-import com.marketplace.MarketBack.controller.dto.MessageResponseDto;
-import com.marketplace.MarketBack.persistence.entity.ConversationEntity;
 import com.marketplace.MarketBack.persistence.entity.MessageEntity;
 import com.marketplace.MarketBack.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +32,12 @@ public class MessageController {
                 request.getRecipientId(),
                 request.getContent());
 
-        return ResponseEntity.ok("Enviado id: "+message.getId());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Enviado");
+        response.put("id", message.getId());
+
+        return ResponseEntity.ok(response);
     }
 
 //    @GetMapping("/conversation/{otherUserId}/{userId}")
@@ -61,11 +63,11 @@ public class MessageController {
         List<MessageEntity> newMessages = messageService.getNewMessages(userId, conversationId, lastCheck);
         return ResponseEntity.ok(newMessages);
     }
-    @PostMapping("/mark-as-read")
+    @PatchMapping("/mark-as-read/{conversationId}")
     public ResponseEntity<Void> markAsRead(
-            @RequestBody MarkMessageDto markMessageDto) {
+            @PathVariable Long conversationId, Authentication auth) {
 
-        messageService.markMessagesAsRead(markMessageDto.getUserId(), markMessageDto.getMessageIds());
+        messageService.markMessagesAsRead(conversationId, auth);
         return ResponseEntity.ok().build();
     }
 

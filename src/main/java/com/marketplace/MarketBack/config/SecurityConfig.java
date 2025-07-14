@@ -73,6 +73,7 @@ public class SecurityConfig {
                     //messages
                     http.requestMatchers(HttpMethod.POST, "/api/messages/**").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.GET, "/api/messages/**").hasAnyRole("ADMIN", "USER");
+                    http.requestMatchers(HttpMethod.PATCH, "/api/messages/**").hasAnyRole("ADMIN", "USER");
 
                     //sales
                     http.requestMatchers(HttpMethod.POST, "/api/sales/**").hasAnyRole("ADMIN", "USER");

@@ -1,6 +1,7 @@
 package com.marketplace.MarketBack.persistence.repository;
 
 import com.marketplace.MarketBack.persistence.entity.ConversationEntity;
+import com.marketplace.MarketBack.persistence.entity.MessageStatus;
 import com.marketplace.MarketBack.persistence.entity.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,4 +58,18 @@ public interface ConversationRepository extends JpaRepository<ConversationEntity
     Optional<ConversationEntity> findByParticipants(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
 
     List<ConversationEntity> findByParticipant1OrParticipant2(UserEntity participant, UserEntity participant2);
+
+//    @Query("SELECT COUNT(m) FROM MessageEntity m WHERE m.recipient.id = :userId AND m.status = SENT AND m.conversation.id = :conversationId")
+//    int countUnreadMessagesByConversationAndRecipient(@Param("conversationId") Long conversationId, @Param("userId") Long userId);
+
+    @Query("SELECT COUNT(m) FROM MessageEntity m " +
+            "WHERE m.recipient.id = :userId " +
+            "AND m.status = :status " +
+            "AND m.conversation.id = :conversationId")
+    int countMessagesByConversationAndRecipientAndStatus(
+            @Param("conversationId") Long conversationId,
+            @Param("userId") Long userId,
+            @Param("status") MessageStatus status
+    );
+
 }

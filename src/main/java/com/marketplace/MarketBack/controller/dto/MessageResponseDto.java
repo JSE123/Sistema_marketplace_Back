@@ -19,5 +19,6 @@ public class MessageResponseDto {
     private Long recipientId;
     private String recipientName;
     private String recipientUsername;
+    private String recipientAvatar;
     private MessageStatus status;
 }

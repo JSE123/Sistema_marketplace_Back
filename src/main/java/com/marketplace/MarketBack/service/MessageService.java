@@ -4,20 +4,20 @@ import com.marketplace.MarketBack.controller.dto.ConversationResponseDto;
 import com.marketplace.MarketBack.controller.dto.MessageResponseDto;
 import com.marketplace.MarketBack.exception.custom.NotFoundException;
 import com.marketplace.MarketBack.exception.enums.ErrorCode;
-import com.marketplace.MarketBack.persistence.entity.ConversationEntity;
-import com.marketplace.MarketBack.persistence.entity.MessageEntity;
-import com.marketplace.MarketBack.persistence.entity.MessageStatus;
-import com.marketplace.MarketBack.persistence.entity.UserEntity;
+import com.marketplace.MarketBack.persistence.entity.*;
 import com.marketplace.MarketBack.persistence.repository.MessageRepository;
 import com.marketplace.MarketBack.persistence.repository.ConversationRepository;
+import com.marketplace.MarketBack.persistence.repository.UserImageRepository;
 import com.marketplace.MarketBack.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +29,9 @@ public class MessageService {
     private ConversationRepository conversationRepository;
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserImageRepository userImageRepository;
 
     public MessageEntity sendMessage(Long senderId, Long recipientId, String content) {
         UserEntity sender = userRepository.findById(senderId)
@@ -107,10 +110,21 @@ public class MessageService {
 //
 //    }
 //
-    public void markMessagesAsRead(Long userId, List<Long> messageIds) {
+    public void markMessagesAsRead(Long conversationId, Authentication auth) {
+        UserEntity user =userRepository.findUserEntityByUsername(auth.getName())
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado", ErrorCode.USER_NOT_FOUND));
+
+        ConversationEntity conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new NotFoundException("Conversación no encontrada", ErrorCode.CONVERSATION_NOT_FOUND));
+
+        List<Long> messageIds = conversation.getMessages().stream()
+                .filter(m -> m.getStatus() == MessageStatus.SENT && m.getRecipient().getId().equals(user.getId() ))
+                .map(MessageEntity::getId)
+                .collect(Collectors.toList());
+
         List<MessageEntity> messages = messageRepository.findAllById(messageIds);
         messages.stream()
-                .filter(m -> m.getRecipient().getId().equals(userId))
+                .filter(m -> m.getRecipient().getId().equals(user.getId()))
                 .forEach(m -> m.setStatus(MessageStatus.READ));
 
         messageRepository.saveAll(messages);
@@ -125,12 +139,13 @@ public class MessageService {
     public List<ConversationResponseDto> getConversations(long userId) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado", ErrorCode.USER_NOT_FOUND));
-
+//        ConversationResponseDto response = new ConversationResponseDto();
         return conversationRepository.findByParticipant1OrParticipant2(user, user).stream()
                 .map(conversation -> {
                     return ConversationResponseDto.builder()
                             .id(conversation.getId())
                             .lastUpdated(conversation.getLastUpdated())
+                            .unreadCount(conversationRepository.countMessagesByConversationAndRecipientAndStatus(conversation.getId(), userId, MessageStatus.SENT))
                             .messages(conversation.getMessages().stream().map(
                                     message -> {
                                         return MessageResponseDto.builder()
@@ -139,9 +154,17 @@ public class MessageService {
                                                 .senderId(message.getSender().getId())
                                                 .senderName(message.getSender().getName())
                                                 .senderUsername(message.getSender().getUsername())
+                                                .senderAvatar(userImageRepository.findUserImageEntityByUserId(message.getSender().getId())
+                                                        .stream().findFirst()
+                                                        .map(UserImageEntity::getUrl)
+                                                        .orElse(null))
                                                 .recipientId(message.getRecipient().getId())
                                                 .recipientName(message.getRecipient().getName())
                                                 .recipientUsername(message.getRecipient().getUsername())
+                                                .recipientAvatar(userImageRepository.findUserImageEntityByUserId(message.getRecipient().getId())
+                                                        .stream().findFirst()
+                                                        .map(UserImageEntity::getUrl)
+                                                        .orElse(null))
                                                 .status(message.getStatus())
                                                 .timestamp(message.getTimestamp())
                                                 .build();
