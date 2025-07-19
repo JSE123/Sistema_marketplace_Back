@@ -25,6 +25,10 @@ public class ReputationEntity {
     @JoinColumn(name = "rater_user_id")
     private UserEntity raterUser;
 
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private ProductEntity product;
+
     private int rating;
     private String comment;
 

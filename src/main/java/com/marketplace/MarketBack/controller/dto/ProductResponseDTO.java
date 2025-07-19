@@ -30,4 +30,5 @@ public class ProductResponseDTO {
     private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
     private CategoryEntity category;
+    private double averageRating = 0.0;
 }

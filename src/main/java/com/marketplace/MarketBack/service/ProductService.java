@@ -9,10 +9,7 @@ import com.marketplace.MarketBack.persistence.entity.CategoryEntity;
 import com.marketplace.MarketBack.persistence.entity.ProductEntity;
 import com.marketplace.MarketBack.persistence.entity.ProductImageEntity;
 import com.marketplace.MarketBack.persistence.entity.UserEntity;
-import com.marketplace.MarketBack.persistence.repository.CateoryRepository;
-import com.marketplace.MarketBack.persistence.repository.ProductImageRepository;
-import com.marketplace.MarketBack.persistence.repository.ProductRepository;
-import com.marketplace.MarketBack.persistence.repository.UserRepository;
+import com.marketplace.MarketBack.persistence.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -47,6 +44,11 @@ public class ProductService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+    @Autowired
+    private ReputationRepository reputationRepository;
+
+
+
     public ProductDTO createProduct(ProductDTO productDTO, Authentication authentication) {
 
         UserEntity user = userRepository.findUserEntityByUsername(authentication.getName()).orElseThrow(() -> new RuntimeException("No se encontro el usuario"));
@@ -79,6 +81,11 @@ public class ProductService {
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id,
                         ErrorCode.USER_NOT_FOUND));
 
+        //Get the product rating
+         double averageRating = reputationRepository.findAverageRatingByProductId(id).orElse(0.0);
+
+
+
         return ProductResponseDTO.builder()
                 .id(product.getId())
                 .title(product.getTitle())
@@ -92,6 +99,7 @@ public class ProductService {
                 .stock(product.getStock())
                 .user(product.getUser().getId().toString())
                 .category(product.getCategory())
+                .averageRating(averageRating)
                 .build();
 //        return new ProductResponseDTO(
 //                product.getId(),
