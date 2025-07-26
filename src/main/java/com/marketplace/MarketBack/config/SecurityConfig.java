@@ -79,8 +79,14 @@ public class SecurityConfig {
                     http.requestMatchers(HttpMethod.POST, "/api/sales/**").hasAnyRole("ADMIN", "USER");
                     http.requestMatchers(HttpMethod.GET, "/api/sales/**").hasAnyRole("ADMIN", "USER");
 
+                    //reputation
                     http.requestMatchers(HttpMethod.POST, "/api/reputation/**").hasAnyRole("ADMIN", "USER");
-                    http.requestMatchers(HttpMethod.GET, "/api/reputation/**").hasAnyRole("ADMIN", "USER");
+                    http.requestMatchers(HttpMethod.GET, "/api/reputation/**").permitAll();
+
+                    //notifications
+                    http.requestMatchers(HttpMethod.POST, "/api/notifications/**").hasAnyRole("ADMIN", "USER");
+                    http.requestMatchers(HttpMethod.GET, "/api/notifications/**").hasAnyRole("ADMIN", "USER");
+
 
                     http.anyRequest().denyAll();//niega el acceso a todos los endpoints que no estan especificados
 

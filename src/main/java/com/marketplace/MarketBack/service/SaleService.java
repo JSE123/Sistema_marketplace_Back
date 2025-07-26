@@ -1,8 +1,10 @@
 package com.marketplace.MarketBack.service;
 
+import com.marketplace.MarketBack.controller.dto.ProductDTO;
 import com.marketplace.MarketBack.controller.dto.SaleDto;
 import com.marketplace.MarketBack.exception.custom.NotFoundException;
 import com.marketplace.MarketBack.exception.enums.ErrorCode;
+import com.marketplace.MarketBack.persistence.entity.NotificationType;
 import com.marketplace.MarketBack.persistence.entity.ProductEntity;
 import com.marketplace.MarketBack.persistence.entity.SaleEntity;
 import com.marketplace.MarketBack.persistence.entity.UserEntity;
@@ -31,6 +33,9 @@ public class SaleService {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     //Save new sales
     public SaleDto createSale(SaleDto saleDto){
         //verify if the product exists and is available
@@ -47,14 +52,22 @@ public class SaleService {
                 .product(product)
                 .build();
 
+
+
         // Save the sale entity to the database
         SaleEntity saleSaved = saleRepository .save(sale);
         // Map the Saleentity to the SaleDto
 
         // if sale saved is successful, decrease the product stock
-        productService.decreaseStock(product.getId(), saleDto.amount());
+        ProductDTO productUpdated = productService.decreaseStock(product.getId(), saleDto.amount());
 
-
+        // If the stock is less than 2, create a notification
+        if(productUpdated.stock() < 2) {
+            // If the stock is less than 2, create a notification
+            notificationService.createNotification("Low stock for product: " + product.getTitle()+
+                    " The stock for product " + product.getTitle() + " is low. Only " + productUpdated.stock() + " left.",
+                    productUpdated.userOwnerId(), NotificationType.STOCK_LOW);
+        }
         return new SaleDto(
                 saleSaved.getProduct().getId(),
                 saleSaved.getAmount(),

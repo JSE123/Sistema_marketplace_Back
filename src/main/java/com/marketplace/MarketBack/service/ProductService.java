@@ -71,7 +71,7 @@ public class ProductService {
 
 //        return productRepository.save(product);
         ProductEntity newProduct = productRepository.save(product);
-        return new ProductDTO(newProduct.getTitle(),newProduct.getDescription(), newProduct.getPrice(), newProduct.getStock(), newProduct.getStatus(), newProduct.getCategory().getId(), newProduct.getLocation(), newProduct.getId() );
+        return new ProductDTO(newProduct.getTitle(),newProduct.getDescription(), newProduct.getPrice(), newProduct.getStock(), newProduct.getStatus(), newProduct.getCategory().getId(), newProduct.getLocation(), newProduct.getId(), newProduct.getUser().getId() );
     }
 
     public ProductResponseDTO getProduct(Long id) {
@@ -243,7 +243,8 @@ public class ProductService {
                 product.getStatus(),
                 product.getCategory().getId(),
                 product.getLocation(),
-                product.getId()
+                product.getId(),
+                product.getUser().getId()
         );
     }
 

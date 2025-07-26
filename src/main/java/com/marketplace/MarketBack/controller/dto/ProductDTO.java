@@ -12,6 +12,7 @@ public record   ProductDTO(
     @Valid EstadoProducto status,
     Long categoryId,
     String location,
-    Long id
+    Long id,
+    Long userOwnerId
 ) {
 }
