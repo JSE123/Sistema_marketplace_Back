@@ -22,4 +22,6 @@ public interface ReputationRepository extends JpaRepository<ReputationEntity, Lo
 
     @Query("SELECT AVG(r.rating) FROM ReputationEntity r WHERE r.product.id = :productId")
     Optional<Double> findAverageRatingByProductId(@Param("productId") Long productId);
+
+    List<ReputationEntity> findByRatedUserId(Long userId);
 }

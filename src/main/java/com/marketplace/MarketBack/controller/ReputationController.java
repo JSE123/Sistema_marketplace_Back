@@ -24,4 +24,14 @@ public class ReputationController {
     public ResponseEntity<?> getReputations(@PathVariable Long productId){
         return ResponseEntity.ok(reputationService.getReputation(productId));
     }
+
+    @GetMapping("/featured-sellers")
+    public ResponseEntity<?> getFeaturedSellers() {
+        return ResponseEntity.ok(reputationService.getFeaturedSellers());
+    }
+
+    @GetMapping("/user-assessment/{userId}")
+    public ResponseEntity<?> getUserRatingAndComments(@PathVariable Long userId) {
+        return ResponseEntity.ok(reputationService.getUserRating(userId));
+    }
 }
