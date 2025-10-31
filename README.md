@@ -1,4 +1,4 @@
-# 🛒 Marketplace de Trueque
+# 🛒 API Marketplace
 
 Aplicación backend desarrollada con **Spring Boot** que permite a los usuarios intercambiar productos mediante un sistema de trueques, autenticación segura con **JWT** y gestión de permisos basada en roles.  
 El proyecto utiliza **PostgreSQL** como base de datos y **Cloudinary** para el almacenamiento de imágenes.
