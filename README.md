@@ -100,7 +100,7 @@ Crea un archivo `.env` o usa variables del sistema con los siguientes valores:
 
 ### 🧭 Diagrama del modelo de datos
 
-![Modelo ER](diagram.er.png)
+![Modelo ER](assets/diagram.er.png)
 
 
 ## 🧰 Cómo ejecutar el proyecto
