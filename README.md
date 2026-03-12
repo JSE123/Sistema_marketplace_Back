@@ -121,4 +121,4 @@ Crea un archivo `.env` o usa variables del sistema con los siguientes valores:
 
 **José Silva**  
 Desarrollador Backend — Java / Spring Boot  
-[LinkedIn](https://www.linkedin.com/in/tu-perfil) | [GitHub](https://github.com/tu-usuario)
+[LinkedIn](www.linkedin.com/in/josesilvap) | [GitHub](https://github.com/JSE123)
